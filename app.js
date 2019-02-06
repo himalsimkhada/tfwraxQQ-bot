@@ -2,19 +2,12 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const settings = require('./settings.json');
 const chalk = require('chalk');
-require('./util/eventLoader')(client);
 const fs = require('fs');
 const moment = require('moment');
 require('./util/eventLoader')(client);
 
-client.on('message', msg => {
-  if (msg.content.startsWith('+specifictest')) {
-    client.channels.get("542219313428299801").send('Hello World!');
-  }
-});
-
 const log = message => {
-  console.log(`[${moment().format("YYYY-MM-DD HH:mm:ss")}] ${message}`);
+  console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
 };
 
 client.commands = new Discord.Collection();
@@ -24,7 +17,7 @@ fs.readdir('./commands/', (err, files) => {
   log(`Loading a total of ${files.length} commands.`);
   files.forEach(f => {
     let props = require(`./commands/${f}`);
-    log(`Loading Command: ${props.help.name}.`);
+    log(`Loading Command: ${props.help.name}. 👌`);
     client.commands.set(props.help.name, props);
     props.conf.aliases.forEach(alias => {
       client.aliases.set(alias, props.help.name);
@@ -53,8 +46,6 @@ client.reload = command => {
 };
 
 client.elevation = message => {
-  /* This function should resolve to an ELEVATION level which
-     is then sent to the command handler for verification*/
   let permlvl = 0;
   let mod_role = message.guild.roles.find(role => role.name === `${settings.modrolename}`);
   if (mod_role && message.member.roles.has(mod_role.id)) permlvl = 2;
@@ -65,22 +56,17 @@ client.elevation = message => {
 };
 
 
-//client.on('',() => {});
-//'542219313428299801'
-//Guild_Events
-
 var regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
+// client.on('debug', e => {
+//   console.log(chalk.bgBlue.green(e.replace(regToken, 'that was redacted')));
+// });
 
-client.on('debug', info => {
-  console.log(chalk.bgBlue(info.replace(regToken, '<hidden>')));
+client.on('warn', e => {
+  console.log(chalk.bgYellow(e.replace(regToken, 'that was redacted')));
 });
 
-client.on('warn', info => {
-  console.log(chalk.bgYellow(info.replace(regToken, '<hidden>')));
-});
-
-client.on('error', error => {
-  console.log(chalk.bgRed(error.replace(regToken, '<hidden>')));
+client.on('error', e => {
+  console.log(chalk.bgRed(e.replace(regToken, 'that was redacted')));
 });
 
 client.login(settings.token);
